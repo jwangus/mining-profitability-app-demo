@@ -1,0 +1,1 @@
+# mining-profitability-app-demo
