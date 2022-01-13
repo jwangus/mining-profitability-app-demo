@@ -3,20 +3,32 @@ from datetime import date
 
 import pandas as pd
 
-st.title ("Mining Profitability Chart")
+st.title("Historical Mining Profits Calculator")
 
-st.sidebar.selectbox("Select GPU Type:", ("NVIDIA RX 3090", "NVIDIA RX 3080", "AMD RX 6800"))
-st.sidebar.number_input("Number of GPUs", value=8, min_value=2, max_value=16, step=2)
-st.sidebar.date_input("Start Date:", value=date(2021,1,1), min_value=date(2013,1,1), max_value=date.today())
-st.sidebar.date_input("End Date:")
-st.sidebar.text_input("Electricity Cost:", value="")
-st.sidebar.text_input("Price Paid for Rigging:")
+gpu_type = st.sidebar.selectbox("GPU Cards:", ("8 x NVIDIA GeForce RTX 3090", "8 x AMD Radeon RX 580"),
+                                help="Select the number of GUPs and model that match your configuration.")
 
-st.sidebar.selectbox("Strategy:", ("Mine & Hold", "Mine & Sell"))
-st.sidebar.button("Sumbit")
+#num_gpu = st.sidebar.number_input("Number of GPUs", value=8, min_value=4, max_value=16, step=4)
+start_date = st.sidebar.date_input("Mining Starts on:",
+                                   value=date(2021, 1, 1), min_value=date(2013, 1, 1), max_value=date.today(), 
+                                   help="Select a date in the past.")
 
-df = pd.read_csv("./sample_data/eth_mining_results.csv")
-df_c = df[['Mine & HODL','Mine & Sell', 'Buy ETH Directly']]
+len_in_days = st.sidebar.number_input(
+    "Number of Days of Mining:", value=360, min_value=0, max_value=1080, step = 30)
 
-st.write("Returns of Mining/Accumulation Scenarios vs. Holding Ethereum")
-st.line_chart(df_c)
+electricity_cost = st.sidebar.text_input(
+    "Electricity Cost:", value="10 cents per KW")
+
+price_paid = st.sidebar.text_input(
+    "Non GPU Harware Cost:", help="Cost of the rigging peripherals, e.g chassis")
+other_paid = st.sidebar.text_input("Other Cost Adjustment:", help="Put value in USD to reflect other initial investment in the mining rig.")
+
+strategy = st.sidebar.selectbox("Strategy:", ("Mine & Hold", "Mine & Sell"))
+
+if st.sidebar.button("Sumbit"):
+    df = pd.read_csv("./sample_data/eth_mining_results.csv")
+    df_c = df[['Mine & HODL', 'Mine & Sell', 'Buy ETH Directly']]
+    st.write("Returns of Mining/Accumulation Scenarios vs. Holding Ethereum")
+    st.line_chart(df_c)
+else:
+    st.error("Use the left panel to input your rigging info and click on Sumbit button to see results.")
