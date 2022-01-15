@@ -21,7 +21,7 @@ len_in_days = st.sidebar.number_input(
 
 
 electricity_cost = st.sidebar.text_input(
-    "Electricity Cost:", value="10 cents per KW")
+    "Electricity Cost:", value="10 cents per kWh")
 
 price_paid = st.sidebar.text_input(
     "Non GPU Hardware Cost:", value="500",help="Cost of the rigging peripherals, e.g chassis")
