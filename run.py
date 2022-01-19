@@ -29,7 +29,7 @@ price_paid = st.sidebar.text_input(
 
 strategies = ("Mine & Hold", "Mine & Sell", "Mine & Sell 50%", "Buy BTC", "Buy ETH")
 
-strategy = st.sidebar.selectbox("Strategy:", strategies)
+#strategy = st.sidebar.selectbox("Strategy:", strategies)
 
 gpu_price = 600.0
 end_date = start_date + timedelta(days=len_in_days)
