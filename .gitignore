@@ -1,1 +1,3 @@
 calc/_secret.py
+*.ipynb
+*.pyc
