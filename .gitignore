@@ -1,3 +1,5 @@
 calc/_secret.py
 *.ipynb
 *.pyc
+.streamlit/secrets.toml
+_secret.py
