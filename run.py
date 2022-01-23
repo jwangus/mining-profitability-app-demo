@@ -15,7 +15,7 @@ today = datetime.utcnow().date()
 #st.write(f'today(UTC) : {today}')
 
 c_df = calculate_matrix(today)
-st.write(c_df)
+#st.write(c_df)
 
 min_date = c_df.index.min()
 max_date = c_df.index.max()
@@ -108,9 +108,13 @@ if st.sidebar.button("Submit"):
     ether_mined = rows_in_range['reward_per_ghps']*rows_in_range['ether_price'].sum()*gpu_hash_rate_ghps
     
     #st.markdown(results)
+    st.header("Historical Ether Price")
     st.line_chart(rows_in_range ['ether_price'], width=800, use_container_width=False)
+    st.header("Daily Reward in Dollar per GH per Second")
     st.line_chart(rows_in_range ['dollar_reward_per_ghps'], width=800, use_container_width=False)
+    st.header("Daily Reward in Ether per GH per Second")
     st.line_chart(rows_in_range ['reward_per_ghps'], width=800, use_container_width=False)
+    st.header("Historical RX850 GPU price")
     st.line_chart(rows_in_range ['gpu_price'], width=800, use_container_width=False)
 else:
     st.error("Use the left panel to input your rigging info and click on Sumbit button to see results.")
