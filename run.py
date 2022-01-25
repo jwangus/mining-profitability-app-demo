@@ -1,10 +1,9 @@
-import re
-from tokenize import String
 import streamlit as st
 from datetime import datetime, date, timedelta
 from calculator import calc_matrix,calc
 
 import pandas as pd
+
 
 @st.cache
 def calculate_matrix(today):
@@ -14,12 +13,12 @@ today = datetime.utcnow().date()
 #st.write(f'today(UTC) : {today}')
 
 c_df = calculate_matrix(today)
-st.write(c_df)
+# st.write(c_df)
 
 min_date = c_df.index.min()
 max_date = c_df.index.max()
 
-gpu_selection:String = st.sidebar.selectbox("GPU Cards:", ("8 x NVIDIA GeForce RTX 3090", "8 x AMD Radeon RX 580"),
+gpu_selection:str = st.sidebar.selectbox("GPU Cards:", ("8 x NVIDIA GeForce RTX 3090", "8 x AMD Radeon RX 580"),
                                 help="Select the number of GUPs and model that match your configuration.")
 
 gpu_number_str, gpu_model = gpu_selection.split(" x ",2)
@@ -39,62 +38,41 @@ len_in_days = (raw_end_date - raw_start_date).days + 1
 electricity_cost_text = st.sidebar.text_input(
     "Electricity Cost:", value="10 cents per kWh")
 
-#price_paid_text = st.sidebar.text_input(
-#    "Non GPU Hardware Cost:", value="500",help="Cost of the rigging peripherals, e.g chassis")
-#other_paid = st.sidebar.text_input("Other Cost Adjustment:", help="Put value in USD to reflect other initial investment in the mining rig.")
-
 strategies = ("Mine & Hold", "Mine & Sell", "Mine & Sell 50%", "Buy BTC", "Buy ETH")
 
 def show_results(df):
-    r = calc(df, raw_start_date, raw_end_date, 0.24)
-    r
-    # results = f"""
-    # ## Mining Profits from {raw_start_date} to {raw_end_date}
-    # ### Length: {len_in_days} Days
+    r = calc(df, raw_start_date, raw_end_date, 0.24, rig_kilowatt=0.13*8)
+    rows_in_range = r['rows_in_range']
+    results = f"""
+    ## Ethereum Mining Profit and Loss Calculator
+    ### Market value changes in {len_in_days} days ending on {raw_end_date}
+    |                  |  USD Value on {raw_start_date}  |  USD Value on {raw_end_date}  | Change |
+    |------------------|:-------------------------------:|:-----------------------------:|:------:|
+    | Ether Price      |  $ {r['start_ether_price']:,.0f} | $ {r['end_ether_price']:,.0f} | $ {(r['end_ether_price'] - r['start_ether_price']):,.2f} |
+    | Estimated Rig Value |  $ {r['rig_price']:,.0f} | $ {r['rig_buyback_price']:,.0f} | $ {(r['rig_buyback_price'] - r['rig_price']):,.2f} |
 
-    # ### Estimated Initial Investment (based on used GPU market price)
-    # |  | Amount USD | Amount in ETH |
-    # | --- | --- | --- |
-    # | {gpu_selection} | {r[rig_price_start} | {rig_price_start_ether} |
- 
-    # ### Returns by Scenarios
-    # | Scenarios | Return in USD | Return in ETH | % Return on Investment |
-    # | --- | --- | --- | --- |
-    # | {strategies[0]} | 2000 | 2.0 | 140% |
-    # | {strategies[1]} | 2000 | 2.0 | 140% |
-    # | {strategies[2]} | 2000 | 2.0 | 140% |
-    # | {strategies[3]} | 2000 | 2.0 | 140% |
-    # | {strategies[4]} | 2000 | 2.0 | 140% |
 
-    # ### {strategies[0]}
-    # | | Amount USD | Amount in ETH |
-    # | --- | --- | --- |
-    # | Ethereum | 6000 | 2.0 |
-    # | USD | 0 | 0 |
-    # | Rig Buyout | 3,800 | |
-    # | __Total__ | 3,000 | |
-    # | ROI | 150% | |
+    ### Returns on totoal investment of $ {r["total_investment"]:,.0f}
+    |                      | Mine & Hold   | Mine & Hold 50% | Mine & Sell      | Buy Ether  |
+    |----------------------|:-------------:|:---------------:|:----------------:|:---------:|
+    | Rig Buyback Value    | $ {r['rig_buyback_price']:,.0f} | $ {r['rig_buyback_price']:,.0f} | $ {r['rig_buyback_price']:,.0f} | - |
+    | Ether Account Value  | $ {r['hold_100_ether_acct_usd_value']:,.0f} | $ {r['hold_50_ether_acct_usd_value']:,.0f} | - | $ {r["buy_ether_ether_acct_usd_value"]:,.0f} | 
+    | USD Account Value    | - | $ {r['hold_50_usd_acct_usd_value']:,.0f} | $ {r['hold_0_usd_acct_usd_value']:,.0f} | - |
+    | Rig Purchase Expense | $ {r['rig_price']:,.0f} | $ {r['rig_price']:,.0f} | $ {r['rig_price']:,.0f} | - |
+    | Electricity Expense  | $ {r['total_electricity_cost']:,.0f} | $ {r['total_electricity_cost']:,.0f} | $ {r['total_electricity_cost']:,.0f} | - |
+    | Total Expense/Investment | $ {r["total_investment"]:,.0f} | $ {r["total_investment"]:,.0f} | $ {r["total_investment"]:,.0f}| $ {r["total_investment"]:,.0f} |
+    | PnL                  | $ {r['hold_100_pnl']:,.0f} | $ {r['hold_50_pnl']:,.0f} | $ {r['hold_0_pnl']:,.0f} | $ {r["buy_ether_pnl"]:,.0f} |
 
-    # ### {strategies[1]}
-    # | | Amount USD | Amount in ETH |
-    # | --- | --- | --- |
-    # | Ethereum | 6000 | 2.0 |
-    # | USD | 0 | 0 |
-    # | Rig Buyout | 3,800 | |
-    # | __Total__ | 3,000 | |
-    # | ROI | 150% | |
-
-    # ### Returns Comparison Chart
-    # """
-    # st.markdown(results)
-    # st.header("Historical Ether Price")
-    # st.line_chart(rows_in_range ['ether_price'], width=800, use_container_width=False)
-    # st.header("Daily Reward in Dollar per GH per Second")
-    # st.line_chart(rows_in_range ['dollar_reward_per_ghps'], width=800, use_container_width=False)
-    # st.header("Daily Reward in Ether per GH per Second")
-    # st.line_chart(rows_in_range ['reward_per_ghps'], width=800, use_container_width=False)
-    # st.header("Historical RX850 GPU price")
-    # st.line_chart(rows_in_range ['gpu_price'], width=800, use_container_width=False)
+    """
+    st.markdown(results)
+    st.write("### Historical Ether Price")
+    st.line_chart(rows_in_range ['ether_price'], width=800, use_container_width=False)
+    st.write("### Daily Reward in Dollar per GH per Second")
+    st.line_chart(rows_in_range ['dollar_reward_per_ghps'], width=800, use_container_width=False)
+    st.write("### Daily Reward in Ether per GH per Second")
+    st.line_chart(rows_in_range ['reward_per_ghps'], width=800, use_container_width=False)
+    st.write("### Historical RX850 GPU price")
+    st.line_chart(rows_in_range [['new_gpu_price','used_gpu_price']], width=800, use_container_width=False)
 
 if st.sidebar.button("Submit"):
     show_results(c_df)

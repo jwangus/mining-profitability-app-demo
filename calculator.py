@@ -1,3 +1,4 @@
+from unittest import result
 import pandas as pd
 import requests
 from io import BytesIO
@@ -136,16 +137,33 @@ chassis_cost=500, rig_kilowatt=1, buyback_multiplier=1):
 
     rig_buyback_price = (gpu_number * df.at[end, "used_gpu_price"] + chassis_cost)*buyback_multiplier
 
-    return {
+    expense = rig_price + total_electricity_cost
+
+    results = {
         "rig_price" : rig_price,
         "rig_buyback_price" : rig_buyback_price,
         "start_ether_price" : start_ether_price,
         "end_ether_price" : end_ether_price,
-        "ether_mined" : ether_mined,
-        "ether_mined_dollar" : ether_mined_dollar,
+        "hold_100_ether_acct" : ether_mined,
+        "hold_100_ether_acct_usd_value" : ether_mined * end_ether_price,
+        "hold_100_usd_acct_usd_value" : 0,
+        "hold_0_ether_acct_usd_value" : 0,
+        "hold_0_usd_acct_usd_value" : ether_mined_dollar,
+        "hold_50_ether_acct_usd_value" : ether_mined * end_ether_price / 2,
+        "hold_50_usd_acct_usd_value" :  ether_mined_dollar / 2,
         "start_date" : start.date(),
         "end_date" : end.date(),
         "electricity_price" : electricity_price,
         "total_electricity_cost" : total_electricity_cost,
         "rows_in_range" : rows_in_range
     }
+
+    results["total_investment"] = expense
+    results["hold_100_pnl"] = rig_buyback_price + results["hold_100_ether_acct_usd_value"] + results["hold_100_usd_acct_usd_value"] - expense
+    results["hold_50_pnl"] = rig_buyback_price + results["hold_50_ether_acct_usd_value"] + results["hold_50_usd_acct_usd_value"] - expense
+    results["hold_0_pnl"] = rig_buyback_price + results["hold_0_ether_acct_usd_value"] + results["hold_0_usd_acct_usd_value"] - expense
+    results["buy_ether_ether_acct_value"] = results["total_investment"]/start_ether_price
+    results["buy_ether_ether_acct_usd_value"] = results["buy_ether_ether_acct_value"] * end_ether_price
+    results["buy_ether_usd_acct_usd_value"] = 0
+    results["buy_ether_pnl"] = results["buy_ether_ether_acct_usd_value"] - results["total_investment"]
+    return results
