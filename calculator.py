@@ -16,10 +16,17 @@ def _get_from_etherscan (data_type):
     if (response.status_code != 200):
         return
 
-    df = pd.read_csv(BytesIO(response.content),
+    if data_type == 'dailyethburnt':
+        df = pd.read_csv(BytesIO(response.content),
                  index_col='Date(UTC)', 
                  converters = {'Date(UTC)': pd.to_datetime},
-                 usecols = [ 'Date(UTC)', 'Value'])
+                 usecols = [ 'Date(UTC)', 'BurntFees'])
+        df.rename(columns={'BurntFees':'Value'}, inplace=True)    
+    else:
+        df = pd.read_csv(BytesIO(response.content),
+                index_col='Date(UTC)', 
+                converters = {'Date(UTC)': pd.to_datetime},
+                usecols = [ 'Date(UTC)', 'Value'])
 
     return df
 
@@ -89,7 +96,8 @@ def calc_matrix(keepa_api_key):
     return df
 
 def calc (df, start_date, end_date, gpu_giga_hashrate, rig_price=None, electricity_price=0.1, gpu_number=8, 
-chassis_cost=500, rig_kilowatt=1, buyback_multiplier=1):
+        chassis_cost=500, rig_kilowatt=1, pool_fee_percent = 1, 
+        buyback_multiplier=1):
     '''
      Returns calculation results
         Parameters:
@@ -135,6 +143,8 @@ chassis_cost=500, rig_kilowatt=1, buyback_multiplier=1):
     ether_mined_dollar = rows_in_range['dollar_reward_per_ghps'].sum()*gpu_giga_hashrate
     ether_mined = rows_in_range['reward_per_ghps'].sum()*gpu_giga_hashrate
 
+    pool_fee_ether = ether_mined * (1 - pool_fee_percent)
+
     rig_buyback_price = (gpu_number * df.at[end, "used_gpu_price"] + chassis_cost)*buyback_multiplier
 
     expense = rig_price + total_electricity_cost
@@ -144,8 +154,9 @@ chassis_cost=500, rig_kilowatt=1, buyback_multiplier=1):
         "rig_buyback_price" : rig_buyback_price,
         "start_ether_price" : start_ether_price,
         "end_ether_price" : end_ether_price,
-        "hold_100_ether_acct" : ether_mined,
-        "hold_100_ether_acct_usd_value" : ether_mined * end_ether_price,
+        "total_ether_mined" : ether_mined,
+        "hold_100_ether_acct" : ether_mined - pool_fee_ether,
+        "hold_100_ether_acct_usd_value" : (ether_mined - pool_fee_ether) * end_ether_price,
         "hold_100_usd_acct_usd_value" : 0,
         "hold_0_ether_acct_usd_value" : 0,
         "hold_0_usd_acct_usd_value" : ether_mined_dollar,

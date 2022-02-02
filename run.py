@@ -18,8 +18,12 @@ c_df = calculate_matrix(today)
 min_date = c_df.index.min()
 max_date = c_df.index.max()
 
-gpu_selection:str = st.sidebar.selectbox("GPU Cards:", ("8 x NVIDIA GeForce RTX 3090", "8 x AMD Radeon RX 580"),
+#gpu_selection:str = st.sidebar.selectbox("GPU Cards:", ("8 x NVIDIA GeForce RTX 3090", "8 x AMD Radeon RX 580"),
+#                                help="Select the number of GUPs and model that match your configuration.")
+
+gpu_selection:str = st.sidebar.selectbox("GPU Cards:", ("8 x AMD Radeon RX 580", ""),
                                 help="Select the number of GUPs and model that match your configuration.")
+
 
 gpu_number_str, gpu_model = gpu_selection.split(" x ",2)
 gpu_number = float(gpu_number_str)
@@ -35,13 +39,14 @@ raw_end_date = st.sidebar.date_input("Mining Ends on:",
 
 len_in_days = (raw_end_date - raw_start_date).days + 1
 
-electricity_cost_text = st.sidebar.text_input(
-    "Electricity Cost:", value="10 cents per kWh")
+electricity_cost_cents = st.sidebar.number_input(
+    "Electricity Cost (cents per Kwh):", value=10, min_value=0, max_value=100)
 
 strategies = ("Mine & Hold", "Mine & Sell", "Mine & Sell 50%", "Buy BTC", "Buy ETH")
 
 def show_results(df):
-    r = calc(df, raw_start_date, raw_end_date, 0.24, rig_kilowatt=0.13*8)
+    r = calc(df, raw_start_date, raw_end_date, 0.24, rig_kilowatt=0.13*8, 
+        electricity_price = electricity_cost_cents/100.0)
     rows_in_range = r['rows_in_range']
     results = f"""
     ## Ethereum Mining Profit and Loss Calculator
@@ -65,13 +70,13 @@ def show_results(df):
 
     """
     st.markdown(results)
-    st.write("### Historical Ether Price")
+    st.write("### Historical Ethereum Price")
     st.line_chart(rows_in_range ['ether_price'], width=800, use_container_width=False)
     st.write("### Daily Reward in Dollar per GH per Second")
     st.line_chart(rows_in_range ['dollar_reward_per_ghps'], width=800, use_container_width=False)
     st.write("### Daily Reward in Ether per GH per Second")
     st.line_chart(rows_in_range ['reward_per_ghps'], width=800, use_container_width=False)
-    st.write("### Historical RX850 GPU price")
+    st.write("### Historical AMD RX580 GPU price")
     st.line_chart(rows_in_range [['new_gpu_price','used_gpu_price']], width=800, use_container_width=False)
 
 if st.sidebar.button("Submit"):
