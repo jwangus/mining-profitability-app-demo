@@ -171,10 +171,14 @@ def calc (df, start_date, end_date, gpu_giga_hashrate, rig_price=None, electrici
 
     results["total_investment"] = expense
     results["hold_100_pnl"] = rig_buyback_price + results["hold_100_ether_acct_usd_value"] + results["hold_100_usd_acct_usd_value"] - expense
+    results["hold_100_roi"] = results["hold_100_pnl"] / expense 
     results["hold_50_pnl"] = rig_buyback_price + results["hold_50_ether_acct_usd_value"] + results["hold_50_usd_acct_usd_value"] - expense
+    results["hold_50_roi"] = results["hold_50_pnl"] / expense
     results["hold_0_pnl"] = rig_buyback_price + results["hold_0_ether_acct_usd_value"] + results["hold_0_usd_acct_usd_value"] - expense
+    results["hold_0_roi"] = results["hold_0_pnl"] / expense
     results["buy_ether_ether_acct_value"] = results["total_investment"]/start_ether_price
     results["buy_ether_ether_acct_usd_value"] = results["buy_ether_ether_acct_value"] * end_ether_price
     results["buy_ether_usd_acct_usd_value"] = 0
     results["buy_ether_pnl"] = results["buy_ether_ether_acct_usd_value"] - results["total_investment"]
+    results["buy_ether_roi"] = results["buy_ether_pnl"] / expense
     return results

@@ -67,6 +67,7 @@ def show_results(df):
     | Electricity Expense  | $ {r['total_electricity_cost']:,.0f} | $ {r['total_electricity_cost']:,.0f} | $ {r['total_electricity_cost']:,.0f} | - |
     | Total Expense/Investment | $ {r["total_investment"]:,.0f} | $ {r["total_investment"]:,.0f} | $ {r["total_investment"]:,.0f}| $ {r["total_investment"]:,.0f} |
     | PnL                  | $ {r['hold_100_pnl']:,.0f} | $ {r['hold_50_pnl']:,.0f} | $ {r['hold_0_pnl']:,.0f} | $ {r["buy_ether_pnl"]:,.0f} |
+    | Return on Investemet | {r['hold_100_roi']*100:,.1f}% | {r['hold_50_roi']*100:,.1f}% | {r['hold_0_roi']*100:,.1f}% | {r["buy_ether_roi"]*100:,.1f}% |
 
     """
     st.markdown(results)
