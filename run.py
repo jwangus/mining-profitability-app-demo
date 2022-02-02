@@ -76,7 +76,7 @@ def show_results(df):
     st.line_chart(rows_in_range ['dollar_reward_per_ghps'], width=800, use_container_width=False)
     st.write("### Daily Reward in Ether per GH per Second")
     st.line_chart(rows_in_range ['reward_per_ghps'], width=800, use_container_width=False)
-    st.write("### Historical AMD RX580 8GB GPU Card Prices")
+    st.write("### Historical AMD RX 580 8GB GPU Card Prices")
     st.line_chart(rows_in_range [['new_gpu_price','used_gpu_price']], width=800, use_container_width=False)
 
 if st.sidebar.button("Submit"):
