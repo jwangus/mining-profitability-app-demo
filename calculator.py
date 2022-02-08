@@ -58,19 +58,24 @@ def _create_blank_df ():
 
 def _prepare_calc_data(keepa_api_key):
     df = _create_blank_df()
-
+    # network daily average hash rate
     hr_df = hr = _get_from_etherscan('hashrate')
     hr_df.rename (columns={'Value': 'hash_rate'}, inplace=True)
     df = df.merge(hr_df, left_index=True, right_index=True, how='left')
-
+    # total block reward
     br_df = _get_from_etherscan('blockreward')
     br_df.rename (columns={'Value': 'block_reward'}, inplace=True)
     df = df.merge(br_df, left_index=True, right_index=True, how='left')
-
+    # historical eth price
     ep_df = _get_from_etherscan('etherprice')
     ep_df.rename (columns={'Value': 'ether_price'}, inplace=True)
     df = df.merge(ep_df, left_index=True, right_index=True, how='left')
-
+    # historical transaction fee
+    tf_df = _get_from_etherscan('transactionfee')
+    tf_df['transaction_fee'] = (tf_df['Value'].astype('float64') / 1e18)
+    del tf_df['Value']
+    df = df.merge(tf_df, left_index=True, right_index=True, how='left')
+    # historical GPU card price
     new_df, up_df = _get_gpu_prices_from_keepa ('B06XZQMMHJ', keepa_api_key)
     df = df.merge(new_df, left_index=True, right_index=True, how='left')
     df = df.merge(up_df, left_index=True, right_index=True, how='left')
@@ -79,10 +84,10 @@ def _prepare_calc_data(keepa_api_key):
 
 def _add_calculated_cols (df):
     # daily reward per GH/s(ghps) of hash rate 
-    df['reward_per_ghps'] = df['block_reward'] / df['hash_rate']
+    df['reward_per_ghps'] = (df['block_reward'] + df['transaction_fee']) / df['hash_rate']
     # convert to dollar
     df['dollar_reward_per_ghps'] = df['reward_per_ghps'] * df['ether_price']
-    #fill the gaps in gpu price
+    #GPU price data is sporadic.  We need to fill the gaps.
     df['used_gpu_price'].interpolate(inplace=True)
     df['used_gpu_price'].fillna(method='backfill', inplace=True)
     df['new_gpu_price'].interpolate(inplace=True)
