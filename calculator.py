@@ -1,4 +1,3 @@
-from unittest import result
 import pandas as pd
 import requests
 from io import BytesIO
@@ -102,7 +101,7 @@ def calc_matrix(keepa_api_key):
 
 def calc (df, start_date, end_date, gpu_giga_hashrate, rig_price=None, electricity_price=0.1, gpu_number=8, 
         chassis_cost=500, rig_kilowatt=1, pool_fee_percent = 1, 
-        buyback_multiplier=1):
+        buyback_multiplier=1, use_new_gpu_price=True):
     '''
      Returns calculation results
         Parameters:
@@ -141,7 +140,8 @@ def calc (df, start_date, end_date, gpu_giga_hashrate, rig_price=None, electrici
     end_ether_price = df.at[end, "ether_price"]
 
     if not rig_price:
-        rig_price = gpu_number * df.at[start, "new_gpu_price"] + chassis_cost
+        col_name="new_gpu_price" if use_new_gpu_price else "used_gpu_price" 
+        rig_price = gpu_number * df.at[start, col_name] + chassis_cost
 
     total_electricity_cost = electricity_price * num_hours * rig_kilowatt
     rows_in_range = df.loc[(df.index >= start) & (df.index <= end)]

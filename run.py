@@ -75,6 +75,8 @@ def show_results(df):
     st.line_chart(rows_in_range ['ether_price'], width=800, use_container_width=False)
     st.write("### Daily Reward in Dollar per GH per Second")
     st.line_chart(rows_in_range ['dollar_reward_per_ghps'], width=800, use_container_width=False)
+    st.write("### Daily transaction fee in Ether")
+    st.line_chart(rows_in_range ['transaction_fee'], width=800, use_container_width=False)
     st.write("### Daily Reward in Ether per GH per Second")
     st.line_chart(rows_in_range ['reward_per_ghps'], width=800, use_container_width=False)
     st.write("### Historical AMD RX 580 8GB GPU Card Prices")
